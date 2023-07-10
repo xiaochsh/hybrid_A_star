@@ -308,9 +308,9 @@ function [isok, path] = AnalysticExpantion(startPose, endPose, veh, cfg)
     % 将起点转换到原点计算轨迹，变换坐标系了
     pvec = endPose - startPose;
     phi = mod2pi(startPose(3));
-    dcm = [cos(phi), sin(phi); -sin(phi), cos(phi)]; % 起点start坐标系在基坐标系下的方向余弦矩阵
+    dcm = [cos(phi), -sin(phi); sin(phi), cos(phi)]; % 起点start坐标系在基坐标系下的方向余弦矩阵
     % dcm*x 表示将基坐标中的x表示到旋转后的坐标系中，即计算坐标旋转后各向量在新坐标中的表示
-    tvec = dcm * [pvec(1); pvec(2)]; % 计算坐标旋转后各向量在起点start坐标中的表示
+    tvec = dcm' * [pvec(1); pvec(2)]; % 计算坐标旋转后各向量在起点start坐标中的表示
 
     rmin = veh.MIN_CIRCLE;
     smax = veh.MAX_STEER;
