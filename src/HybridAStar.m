@@ -1,4 +1,4 @@
-function [x, y, th, D, delta] = HybridAStar(startPose, endPose, veh, cfg)
+function [x, y, th] = HybridAStar(startPose, endPose, veh, cfg)
     mres = cfg.MOTION_RESOLUTION; % motino resolution 
     
     % 把起始的位姿(x, y, theta)转换为grid上的栅格索引
@@ -16,9 +16,8 @@ function [x, y, th, D, delta] = HybridAStar(startPose, endPose, veh, cfg)
     x = zeros(0, 1000, 1, 'single');
     y = zeros(0, 1000, 1, 'single');
     th = zeros(0, 1000, 1, 'single');
-    D = zeros(0, 1000, 1, 'single');
-    delta = zeros(0, 1000, 1, 'single');
-
+    
+    iter = uint8(0);
     while u16OpenIdx > uint16(0)
         % pop the least cost node from open to close
         [wknode, Open, u16OpenIdx] = PopNode(Open, u16OpenIdx, cfg);
@@ -34,18 +33,29 @@ function [x, y, th, D, delta] = HybridAStar(startPose, endPose, veh, cfg)
             u16CloseIdx = u16CloseIdx + uint16(1);
             Close(u16CloseIdx) = wknode;
         end
-
-        % 以wknode为起点生成到终点的无碰撞RS曲线
-        [isok, path] = AnalysticExpantion([wknode.x, wknode.y, wknode.theta], endPose, veh, cfg);
-        if  isok
-            [x, y, th, D, delta] = getFinalPath(path, Close, u16CloseIdx, veh, cfg);
+        
+        if rem(iter, 5) == uint8(0)
+            % 以wknode为起点生成到终点的无碰撞RS曲线
+            [isready, path] = AnalysticExpantion([wknode.x, wknode.y, wknode.theta], endPose, veh, cfg);
+        else
+            pvec = [endPose(1) - wknode.x; endPose(2) - wknode.y];
+            phi = endPose(3) - wknode.theta;
+            if norm(pvec) < mres && abs(phi) < single(pi / 60)
+                isready = true;
+            else
+                isready = false;
+            end
+        end
+        if  isready
+            [x, y, th] = getFinalPath(path, Close, u16CloseIdx, veh, cfg);
             break % 如果能直接生成无碰撞RS曲线RS曲线，则跳出while循环
         end
         [Open, u16OpenIdx, Close] = Update(wknode, Open, u16OpenIdx, Close, u16CloseIdx, veh, cfg); % 使用
+        iter = iter + uint8(1);
     end
 end
 
-function [x, y, th, D, delta] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
+function [x, y, th] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
     wknode = Close(u16CloseIdx); % Close集合最后节点为无碰撞RS曲线起点
     u16CloseIdx = u16CloseIdx - uint16(1);
     nodes = repmat(Node(0, 0, 0, 0, 0, 0, 0, 0, [0, 0, 0], 0), 1000, 1);
@@ -77,18 +87,15 @@ function [x, y, th, D, delta] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
     x = zeros(0, 1000, 1, 'single');
     y = zeros(0, 1000, 1, 'single');
     th = zeros(0, 1000, 1, 'single');
-    D = zeros(0, 1000, 1, 'single');
-    delta = zeros(0, 1000, 1, 'single');
     idx = uint16(0);
     
-    % 最终的路径：1-只有RS曲线；2-混合A*路径和RS曲线组合
-    flag = 0;
+    % 最终的路径：1-只有A*路径；2-只有RS曲线路径；3-混合A*路径
     % 路径要么是纯RS路径，要么是由RS路径和混合A*组合一起来的路径，先处理混合A*的结点，最后处理RS路径，肯定有RS路径
     if nodesNum > uint16(1)
         % nodes中第一个点作为RS曲线的起点，其余点位混合A*路径
         for i = nodesNum: -1 : 2
             tnode = nodes(i);
-            ttnode = nodes(i - 1); % parent of i
+            ttnode = nodes(i - 1);
 
             px = tnode.x;
             py = tnode.y;
@@ -97,8 +104,6 @@ function [x, y, th, D, delta] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
             x(idx) = px;
             y(idx) = py;
             th(idx) = pth;
-            D(idx) = ttnode.D;
-            delta(idx) = ttnode.delta;
 
             nlist = floor(cfg.MIN_PATH_LENGTH / cfg.MOTION_RESOLUTION); 
             for j = 1 : nlist
@@ -107,23 +112,18 @@ function [x, y, th, D, delta] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
                 x(idx) = px;
                 y(idx) = py;
                 th(idx) = pth;
-                D(idx) = ttnode.D;
-                delta(idx) = ttnode.delta;
             end
         end
     else
         % 最后一个结点是纯的RS路径终点
-        flag = 1;
         tnode = nodes(1);
         idx = idx + uint16(1);
         x(idx) = tnode.x;
         y(idx) = tnode.y;
         th(idx) = tnode.theta;
-        D(idx) = mres;
-        delta(idx) = smax;
     end
-
-    % 此时已经搜完了全部路径，最后肯定有一段是RS路径
+    
+    % RS曲线的起点不加入轨迹
     px = nodes(1).x;
     py = nodes(1).y;
     pth = nodes(1).theta;
@@ -139,7 +139,6 @@ function [x, y, th, D, delta] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
             continue
         end
         s = sign(segs(i)); % 前进或后退
-        
         if types(i) == 'S'          
             tdelta = 0;
         elseif types(i) == 'L'
@@ -149,12 +148,6 @@ function [x, y, th, D, delta] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
         else
             % do nothing
         end
-        if flag == 1
-            % initialization if only rs path
-            D(idx) = s * mres;
-            delta(idx) = tdelta;
-            flag = 0;
-        end
         % 根据RS曲线路径的输入，基于运动学公式计算RS曲线上每个路径点的状态x, y, th
         for j = 1 : round(abs(segs(i)) / mres) % 四舍五入为最近的小数或整数
            	[px, py, pth] = VehicleDynamic(px, py, pth, s*mres, tdelta, veh.WB); % s*mres中s代表前进和后退
@@ -162,8 +155,6 @@ function [x, y, th, D, delta] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
             x(idx) = px;
             y(idx) = py;
             th(idx) = pth;
-            D(idx) = s * mres;
-            delta(idx) = tdelta;
         end
     end
 end
@@ -291,11 +282,10 @@ end
 function cost = TotalCost(wknode, cfg)
     gres = cfg.XY_GRID_RESOLUTION;
     costmap = cfg.ObstMap;
-    % 从栅格中心到目标
-    cost = cfg.H_COST * costmap(wknode.yidx, wknode.xidx); % 无障碍碰撞地图上的成本，用A*搜出来的，二维地图，没用航向
-    % 从当前结点到栅格中心
-    xshift = wknode.x - (gres*(wknode.xidx - 0.5) + cfg.MINX); % 栅格的index是线的交点，而不是栅格的中心, 在求坐标时所以会有减0.5
-    yshift = wknode.y - (gres*(wknode.yidx - 0.5) + cfg.MINY);
+    cost = cfg.H_COST * costmap(wknode.yidx, wknode.xidx);
+    % 当前节点位置到栅格中心的欧式距离
+    xshift = wknode.x - (gres * (wknode.xidx - 0.5) + cfg.MINX);
+    yshift = wknode.y - (gres * (wknode.yidx - 0.5) + cfg.MINY);
     cost = cost + cfg.H_COST * norm([xshift, yshift]);
     % f = g + h
     cost = wknode.cost + cost;
@@ -304,6 +294,11 @@ end
 function [isok, path] = AnalysticExpantion(startPose, endPose, veh, cfg)
     isok = true;
     isCollision = false;
+
+    rmin = veh.MIN_CIRCLE;
+    smax = veh.MAX_STEER;
+    mres = cfg.MOTION_RESOLUTION;
+    obstline = cfg.ObstLine;
     
     % 将起点转换到原点计算轨迹，变换坐标系了
     pvec = endPose - startPose;
@@ -312,11 +307,6 @@ function [isok, path] = AnalysticExpantion(startPose, endPose, veh, cfg)
     % dcm*x 表示将基坐标中的x表示到旋转后的坐标系中，即计算坐标旋转后各向量在新坐标中的表示
     tvec = dcm' * [pvec(1); pvec(2)]; % 计算坐标旋转后各向量在起点start坐标中的表示
 
-    rmin = veh.MIN_CIRCLE;
-    smax = veh.MAX_STEER;
-    mres = cfg.MOTION_RESOLUTION;
-    obstline = cfg.ObstLine;
-    
     % 看是否从当前点到目标点存在无碰撞的Reeds-Shepp轨迹，前面pvec=End-Start;的意义就在这里，注意！这里的x, y, prev(3)是把起点转换成以start为原点坐标系下的坐标
     path = FindRSPath(tvec(1), tvec(2), pvec(3), veh);
 

@@ -122,19 +122,12 @@ function [minx, miny, obmap] = CalcObstMap(obstlist, gres)
     maxx = max(obstlist(:, 1));
     miny = min(obstlist(:, 2));
     maxy = max(obstlist(:, 2));
-    xwidth = maxx - minx;
-    xwidth = ceil(xwidth / gres);
-    ywidth = maxy - miny;
-    ywidth = ceil(ywidth / gres);
+    xwidth = ceil((maxx - minx) / gres);
+    ywidth = ceil((maxy - miny) / gres);
     obmap = zeros(ywidth, xwidth);
-    for i = 1 : ywidth
-        for j = 1 : xwidth
-            ix = minx+(j - 1 / 2) * gres;
-            iy = miny+(i - 1 / 2) * gres;
-            [~, D] = knnsearch(obstlist, [ix, iy]);
-            if D < 0.708 * gres
-                obmap(i, j) = 1;
-            end
-        end
+    for i = 1 : length(obstlist)
+        xidx = ceil((obstlist(i, 1) + 0.5 * gres - minx) / gres);
+        yidx = ceil((obstlist(i, 2) + 0.5 * gres - miny) / gres);
+        obmap(yidx, xidx) = 1;
     end
 end

@@ -16,8 +16,8 @@ classdef Node
             obj.xidx = xidx; % pose x index
             obj.yidx = yidx; % pose y index
             obj.yawidx = yawidx; % pose theta index
-            obj.D = D;
-            obj.delta = delta; % motion resoluion
+            obj.D = D; % last path motion resolution
+            obj.delta = delta; % last path theta resolution
             obj.x = x;
             obj.y = y;
             obj.theta = theta;
