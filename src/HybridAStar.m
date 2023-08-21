@@ -1,9 +1,9 @@
 function [x, y, th] = HybridAStar(startPose, endPose, veh, cfg)
     mres = cfg.MOTION_RESOLUTION; % motino resolution 
     
-    % °ÑÆðÊ¼µÄÎ»×Ë(x, y, theta)×ª»»ÎªgridÉÏµÄÕ¤¸ñË÷Òý
+    % ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Î»ï¿½ï¿½(x, y, theta)×ªï¿½ï¿½Îªgridï¿½Ïµï¿½Õ¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     [isok, xidx, yidx, thidx] = CalcIdx(startPose(1), startPose(2), startPose(3), cfg);
-    if isok % °ÑÎ»×ËÕ¤¸ñ¶¨ÒåÎªÒ»¸ö½áµã£¬ÐÎ³ÉÁ´±í½á¹¹
+    if isok % ï¿½ï¿½Î»ï¿½ï¿½Õ¤ï¿½ï¿½ï¿½ï¿½ÎªÒ»ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½á¹¹
         tnode = Node(xidx, yidx, thidx, mres, 0, startPose(1), startPose(2), startPose(3), [xidx, yidx, thidx], 0);
     end
     Open = repmat(Node(0, 0, 0, 0, 0, 0, 0, 0, [0, 0, 0], 0), 1000, 1);
@@ -23,7 +23,7 @@ function [x, y, th] = HybridAStar(startPose, endPose, veh, cfg)
         [wknode, Open, u16OpenIdx] = PopNode(Open, u16OpenIdx, cfg);
         [isok, idx] = inNodes(wknode, Close, u16CloseIdx);
         
-        % ÅÐ¶ÏÊÇ·ñÔÚClose¼¯ºÏÄÚ£¬ÈôÊÇÔò½«wknodeÒÆÖ²¼¯ºÏÄ©Î²
+        % ï¿½Ð¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Closeï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½wknodeï¿½ï¿½Ö²ï¿½ï¿½ï¿½ï¿½Ä©Î²
         if isok
             for i = idx + 1 : u16CloseIdx
                 Close(i - 1) = Close(i);
@@ -35,7 +35,7 @@ function [x, y, th] = HybridAStar(startPose, endPose, veh, cfg)
         end
         
         if rem(iter, 5) == uint8(0)
-            % ÒÔwknodeÎªÆðµãÉú³Éµ½ÖÕµãµÄÎÞÅö×²RSÇúÏß
+            % ï¿½ï¿½wknodeÎªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×²RSï¿½ï¿½ï¿½ï¿½
             [isready, path] = AnalysticExpantion([wknode.x, wknode.y, wknode.theta], endPose, veh, cfg);
         else
             pvec = [endPose(1) - wknode.x; endPose(2) - wknode.y];
@@ -48,23 +48,23 @@ function [x, y, th] = HybridAStar(startPose, endPose, veh, cfg)
         end
         if  isready
             [x, y, th] = getFinalPath(path, Close, u16CloseIdx, veh, cfg);
-            break % Èç¹ûÄÜÖ±½ÓÉú³ÉÎÞÅö×²RSÇúÏßRSÇúÏß£¬ÔòÌø³öwhileÑ­»·
+            break % ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×²RSï¿½ï¿½ï¿½ï¿½RSï¿½ï¿½ï¿½ß£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½whileÑ­ï¿½ï¿½
         end
-        [Open, u16OpenIdx, Close] = Update(wknode, Open, u16OpenIdx, Close, u16CloseIdx, veh, cfg); % Ê¹ÓÃ
+        [Open, u16OpenIdx, Close] = Update(wknode, Open, u16OpenIdx, Close, u16CloseIdx, veh, cfg); % Ê¹ï¿½ï¿½
         iter = iter + uint8(1);
     end
 end
 
 function [x, y, th] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
-    wknode = Close(u16CloseIdx); % Close¼¯ºÏ×îºó½ÚµãÎªÎÞÅö×²RSÇúÏßÆðµã
+    wknode = Close(u16CloseIdx); % Closeï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½Îªï¿½ï¿½ï¿½ï¿½×²RSï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     u16CloseIdx = u16CloseIdx - uint16(1);
     nodes = repmat(Node(0, 0, 0, 0, 0, 0, 0, 0, [0, 0, 0], 0), 1000, 1);
     nodesNum = uint16(1);
     nodes(nodesNum) = wknode;
-    % ÕÒÄ¿±êµãwknodeµÄparent, »ØËÝ£¬Ö±µ½Close¼¯ºÏÎª¿Õ
+    % ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½wknodeï¿½ï¿½parent, ï¿½ï¿½ï¿½Ý£ï¿½Ö±ï¿½ï¿½Closeï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½
     while u16CloseIdx > uint16(0)
         parent = wknode.parent;
-        % ¼ÆËã´ÓÄ¿±ê·µ»Øµ½ÆðÊ¼µãµÄÂ·¾¶µãÐòÁÐ£¬·ÅÈënodesÖÐ
+        % ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ê·µï¿½Øµï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½nodesï¿½ï¿½
         for i = u16CloseIdx : -1 : 1
             tnode = Close(i);
             if tnode.xidx == parent(1) && tnode.yidx == parent(2) && tnode.yawidx == parent(3)
@@ -89,10 +89,10 @@ function [x, y, th] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
     th = zeros(0, 1000, 1, 'single');
     idx = uint16(0);
     
-    % ×îÖÕµÄÂ·¾¶£º1-Ö»ÓÐA*Â·¾¶£»2-Ö»ÓÐRSÇúÏßÂ·¾¶£»3-»ìºÏA*Â·¾¶
-    % Â·¾¶ÒªÃ´ÊÇ´¿RSÂ·¾¶£¬ÒªÃ´ÊÇÓÉRSÂ·¾¶ºÍ»ìºÏA*×éºÏÒ»ÆðÀ´µÄÂ·¾¶£¬ÏÈ´¦Àí»ìºÏA*µÄ½áµã£¬×îºó´¦ÀíRSÂ·¾¶£¬¿Ï¶¨ÓÐRSÂ·¾¶
+    % ï¿½ï¿½ï¿½Õµï¿½Â·ï¿½ï¿½ï¿½ï¿½1-Ö»ï¿½ï¿½A*Â·ï¿½ï¿½ï¿½ï¿½2-Ö»ï¿½ï¿½RSï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½3-ï¿½ï¿½ï¿½A*Â·ï¿½ï¿½
+    % Â·ï¿½ï¿½ÒªÃ´ï¿½Ç´ï¿½RSÂ·ï¿½ï¿½ï¿½ï¿½ÒªÃ´ï¿½ï¿½ï¿½ï¿½RSÂ·ï¿½ï¿½ï¿½Í»ï¿½ï¿½A*ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½A*ï¿½Ä½ï¿½ã£¬ï¿½ï¿½ï¿½ï¿½ï¿½RSÂ·ï¿½ï¿½ï¿½ï¿½ï¿½Ï¶ï¿½ï¿½ï¿½RSÂ·ï¿½ï¿½
     if nodesNum > uint16(1)
-        % nodesÖÐµÚÒ»¸öµã×÷ÎªRSÇúÏßµÄÆðµã£¬ÆäÓàµãÎ»»ìºÏA*Â·¾¶
+        % nodesï¿½Ðµï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªRSï¿½ï¿½ï¿½ßµï¿½ï¿½ï¿½ã£¬ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½A*Â·ï¿½ï¿½
         for i = nodesNum: -1 : 2
             tnode = nodes(i);
             ttnode = nodes(i - 1);
@@ -115,7 +115,7 @@ function [x, y, th] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
             end
         end
     else
-        % ×îºóÒ»¸ö½áµãÊÇ´¿µÄRSÂ·¾¶ÖÕµã
+        % ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ï¿½ï¿½RSÂ·ï¿½ï¿½ï¿½Õµï¿½
         tnode = nodes(1);
         idx = idx + uint16(1);
         x(idx) = tnode.x;
@@ -123,7 +123,7 @@ function [x, y, th] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
         th(idx) = tnode.theta;
     end
     
-    % RSÇúÏßµÄÆðµã²»¼ÓÈë¹ì¼£
+    % RSï¿½ï¿½ï¿½ßµï¿½ï¿½ï¿½ã²»ï¿½ï¿½ï¿½ï¿½ì¼£
     px = nodes(1).x;
     py = nodes(1).y;
     pth = nodes(1).theta;
@@ -138,7 +138,7 @@ function [x, y, th] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
         if abs(segs(i)) < single(1e-3)
             continue
         end
-        s = sign(segs(i)); % Ç°½ø»òºóÍË
+        s = sign(segs(i)); % Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if types(i) == 'S'          
             tdelta = 0;
         elseif types(i) == 'L'
@@ -148,9 +148,9 @@ function [x, y, th] = getFinalPath(path, Close, u16CloseIdx, veh, cfg)
         else
             % do nothing
         end
-        % ¸ù¾ÝRSÇúÏßÂ·¾¶µÄÊäÈë£¬»ùÓÚÔË¶¯Ñ§¹«Ê½¼ÆËãRSÇúÏßÉÏÃ¿¸öÂ·¾¶µãµÄ×´Ì¬x, y, th
-        for j = 1 : round(abs(segs(i)) / mres) % ËÄÉáÎåÈëÎª×î½üµÄÐ¡Êý»òÕûÊý
-           	[px, py, pth] = VehicleDynamic(px, py, pth, s*mres, tdelta, veh.WB); % s*mresÖÐs´ú±íÇ°½øºÍºóÍË
+        % ï¿½ï¿½ï¿½ï¿½RSï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ë¶ï¿½Ñ§ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½RSï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬x, y, th
+        for j = 1 : round(abs(segs(i)) / mres) % ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+           	[px, py, pth] = VehicleDynamic(px, py, pth, s*mres, tdelta, veh.WB); % s*mresï¿½ï¿½sï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½Íºï¿½ï¿½ï¿½
             idx = idx + uint16(1);
             x(idx) = px;
             y(idx) = py;
@@ -163,21 +163,21 @@ function [Open, u16OpenIdx, Close] = Update(wknode, Open, u16OpenIdx, Close, u16
     mres = cfg.MOTION_RESOLUTION; % motino resolution    
     smax = veh.MAX_STEER; % 0.6[rad], maximum steering angle
     sres = smax / cfg.N_STEER; % 20, steering resolution  
-    % all possible control input£¬
-    for D = [-mres, mres] % DÊÇ0.1m, Õý¸º´ú±íÇ°½ø»òºóÍË, ³µÁ¾µ±Ç°Î»ÖÃµÄºóÖáÖÐÐÄÓëÏÂÒ»¸öÎ»ÖÃµÄºóÖáÖÐÐÄÖ®¼äµÄÖ±Ïß¾àÀë£¬ÓÐ2¸ö×Ó½áµã
-        for delta = [-smax:sres:-sres, 0, sres:sres:smax] % deltaÊÇ×ªÏò½Ç£¬·Ö±æÂÊÊÇ0.03[rad]£¬[-0.6, 0.6], ÓÐ21¸ö×Ó½áµã(°üº¬0[rads])
-            [isok, tnode] = CalcNextNode(wknode, D, delta, veh, cfg); % ¼ÆËãwknodeµÄËùÓÐ×Ó½áµã£¬Ò»¹²2*21=42¸ö£¬´Ëº¯ÊýÊÇ¸ù¾Ý¹Ì¶¨µÄDºÍdelta¼ÆËãwknodeÑØ×ÅÒ»ÌõÂ·¾¶µÄËùÓÐ×Ó½áµã£¬tnodeÊÇ´ËÌõÂ·¾¶µÄÄ©¶Ëµã
-            if isok == false % ×Ó½áµã²»¿ÉÐÐ
+    % all possible control inputï¿½ï¿½
+    for D = [-mres, mres] % Dï¿½ï¿½0.1m, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°Î»ï¿½ÃµÄºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Î»ï¿½ÃµÄºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½ï¿½Ö±ï¿½ß¾ï¿½ï¿½ë£¬ï¿½ï¿½2ï¿½ï¿½ï¿½Ó½ï¿½ï¿½
+        for delta = [-smax:sres:-sres, 0, sres:sres:smax] % deltaï¿½ï¿½×ªï¿½ï¿½Ç£ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½0.03[rad]ï¿½ï¿½[-0.6, 0.6], ï¿½ï¿½21ï¿½ï¿½ï¿½Ó½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½0[rads])
+            [isok, tnode] = CalcNextNode(wknode, D, delta, veh, cfg); % ï¿½ï¿½ï¿½ï¿½wknodeï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó½ï¿½ã£¬Ò»ï¿½ï¿½2*21=42ï¿½ï¿½ï¿½ï¿½ï¿½Ëºï¿½ï¿½ï¿½ï¿½Ç¸ï¿½ï¿½Ý¹Ì¶ï¿½ï¿½ï¿½Dï¿½ï¿½deltaï¿½ï¿½ï¿½ï¿½wknodeï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó½ï¿½ã£¬tnodeï¿½Ç´ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½Ä©ï¿½Ëµï¿½
+            if isok == false % ï¿½Ó½ï¿½ã²»ï¿½ï¿½ï¿½ï¿½
                 continue
             end
-            [isok, ~] = inNodes(tnode, Close, u16CloseIdx);% ÔÚClose¼¯ºÏÖÐ
+            [isok, ~] = inNodes(tnode, Close, u16CloseIdx);% ï¿½ï¿½Closeï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             if isok
                 continue
             end 
-            % ÍØÕ¹µÄ½ÚµãÈç¹ûÔÚOpenÖÐ±È½ÏfÖµ;Èô²»ÔÚÔòÌí¼Óµ½OpenÖÐ
+            % ï¿½ï¿½Õ¹ï¿½Ä½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Openï¿½Ð±È½ï¿½fÖµ;ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½Openï¿½ï¿½
             [isok, idx] = inNodes(tnode, Open, u16OpenIdx);
             if isok
-                % ÓëÖ®Ç°µÄcost±È½Ï£¬½øÐÐ¸üÐÂ
+                % ï¿½ï¿½Ö®Ç°ï¿½ï¿½costï¿½È½Ï£ï¿½ï¿½ï¿½ï¿½Ð¸ï¿½ï¿½ï¿½
                 tcost = TotalCost(tnode, cfg);
                 ttnode = Open(idx);
                 ttcost = TotalCost(ttnode, cfg);
@@ -207,13 +207,13 @@ function [isok, idx] = inNodes(node, nodes, nodesNum)
     isok = false;
 end
 
-% ¸ù¾ÝDºÍdelta¼ÆËãwknodeÑØ×ÅÒ»ÌõÂ·¾¶µÄËùÓÐ×Ó½áµã
+% ï¿½ï¿½ï¿½ï¿½Dï¿½ï¿½deltaï¿½ï¿½ï¿½ï¿½wknodeï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó½ï¿½ï¿½
 function [isok, tnode] = CalcNextNode(wknode, D, delta, Vehicle, cfg)
     px = wknode.x;
     py = wknode.y;
     pth = wknode.theta;
     
-    % Åö×²¼ì²â£¬±£Ö¤Ã¿Ìõ¹ì¼£×îÐ¡³¤¶È
+    % ï¿½ï¿½×²ï¿½ï¿½â£¬ï¿½ï¿½Ö¤Ã¿ï¿½ï¿½ï¿½ì¼£ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½
     nlist = floor(cfg.MIN_PATH_LENGTH / cfg.MOTION_RESOLUTION) + 1; 
     x = zeros(1, nlist + 1, 'single');
     y = zeros(1, nlist + 1, 'single');
@@ -221,12 +221,12 @@ function [isok, tnode] = CalcNextNode(wknode, D, delta, Vehicle, cfg)
     x(1) = px;
     y(1) = py;
     th(1) = pth;
-    for idx = 1 : nlist % ¸ù¾Ýµ±Ç°µÄ×´Ì¬ºÍ¸ø¶¨µÄ¿ØÖÆ£¬¼ÆËã´ËÌõÂ·¾¶ÉÏµÄÁ¬×ÅµÄ³µÁ¾×´Ì¬£¬¸ù¾ÝÉÏÒ»Ê±¿Ì¼ÆËãÏÂÒ»Ê±¿Ì
+    for idx = 1 : nlist % ï¿½ï¿½ï¿½Ýµï¿½Ç°ï¿½ï¿½×´Ì¬ï¿½Í¸ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ÅµÄ³ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ê±ï¿½Ì¼ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ê±ï¿½ï¿½
         [px, py, pth] = VehicleDynamic(px, py, pth, D, delta, Vehicle.WB);
-        x(idx + 1) = px; % x, y, th´¢´æÁËÊý¾Ý£¬µ«ÊÇÃ»ÓÃµ½±äÁ¿
+        x(idx + 1) = px; % x, y, thï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½
         y(idx + 1) = py;
         th(idx + 1) = pth;
-        if rem(idx, 5) == 0 % Ã¿¸ô5¸öµã½øÐÐÒ»´ÎÅö×²¼ì²â
+        if rem(idx, 5) == 0 % Ã¿ï¿½ï¿½5ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½×²ï¿½ï¿½ï¿½
             tvec = [px, py, pth];
             isCollision = VehicleCollisionCheck(tvec, cfg.ObstLine, Vehicle);
             if isCollision
@@ -239,14 +239,14 @@ function [isok, tnode] = CalcNextNode(wknode, D, delta, Vehicle, cfg)
         isok = false;
         return
     else
-        [isok, xidx, yidx, thidx] = CalcIdx(px, py, pth, cfg); % °ÑÂ·¾¶Ä©¶ËµãµÄÊµ¼Ê×ø±ê×ª»»ÎªÕ¤¸ñ×ø±ê
+        [isok, xidx, yidx, thidx] = CalcIdx(px, py, pth, cfg); % ï¿½ï¿½Â·ï¿½ï¿½Ä©ï¿½Ëµï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ÎªÕ¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if isok == false
             return
         else
             cost = wknode.cost;
-            if D > 0 % Ç°½ø
+            if D > 0 % Ç°ï¿½ï¿½
                 cost = cost + cfg.MIN_PATH_LENGTH; 
-            else % ºóÍË
+            else % ï¿½ï¿½ï¿½ï¿½
                 cost = cost + cfg.BACK_COST * cfg.MIN_PATH_LENGTH;
             end
             if D ~= wknode.D
@@ -255,7 +255,7 @@ function [isok, tnode] = CalcNextNode(wknode, D, delta, Vehicle, cfg)
             cost = cost + cfg.STEER_COST * abs(delta);
             cost = cost + cfg.STEER_CHANGE_COST * abs(delta - wknode.delta);
             tnode = Node(xidx, yidx, thidx, D, delta, px, py, pth, ...
-                [wknode.xidx, wknode.yidx, wknode.yawidx], cost); % tnodeÊÇÂ·¾¶µÄÄ©¶Ëµã£¬costÎªµ½µ±Ç°×´Ì¬µ½´ËÂ·¾¶Ä©¶Ë×´Ì¬µÄ³É±¾
+                [wknode.xidx, wknode.yidx, wknode.yawidx], cost); % tnodeï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½Ä©ï¿½Ëµã£¬costÎªï¿½ï¿½ï¿½ï¿½Ç°×´Ì¬ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½Ä©ï¿½ï¿½×´Ì¬ï¿½Ä³É±ï¿½
         end         
     end
 end
@@ -283,7 +283,7 @@ function cost = TotalCost(wknode, cfg)
     gres = cfg.XY_GRID_RESOLUTION;
     costmap = cfg.ObstMap;
     cost = cfg.H_COST * costmap(wknode.yidx, wknode.xidx);
-    % µ±Ç°½ÚµãÎ»ÖÃµ½Õ¤¸ñÖÐÐÄµÄÅ·Ê½¾àÀë
+    % ï¿½ï¿½Ç°ï¿½Úµï¿½Î»ï¿½Ãµï¿½Õ¤ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½Å·Ê½ï¿½ï¿½ï¿½ï¿½
     xshift = wknode.x - (gres * (wknode.xidx - 0.5) + cfg.MINX);
     yshift = wknode.y - (gres * (wknode.yidx - 0.5) + cfg.MINY);
     cost = cost + cfg.H_COST * norm([xshift, yshift]);
@@ -300,17 +300,17 @@ function [isok, path] = AnalysticExpantion(startPose, endPose, veh, cfg)
     mres = cfg.MOTION_RESOLUTION;
     obstline = cfg.ObstLine;
     
-    % ½«Æðµã×ª»»µ½Ô­µã¼ÆËã¹ì¼££¬±ä»»×ø±êÏµÁË
+    % ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½ï¿½ì¼£ï¿½ï¿½ï¿½ä»»ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½
     pvec = endPose - startPose;
     phi = mod2pi(startPose(3));
-    dcm = [cos(phi), -sin(phi); sin(phi), cos(phi)]; % Æðµãstart×ø±êÏµÔÚ»ù×ø±êÏµÏÂµÄ·½ÏòÓàÏÒ¾ØÕó
-    % dcm*x ±íÊ¾½«»ù×ø±êÖÐµÄx±íÊ¾µ½Ðý×ªºóµÄ×ø±êÏµÖÐ£¬¼´¼ÆËã×ø±êÐý×ªºó¸÷ÏòÁ¿ÔÚÐÂ×ø±êÖÐµÄ±íÊ¾
-    tvec = dcm' * [pvec(1); pvec(2)]; % ¼ÆËã×ø±êÐý×ªºó¸÷ÏòÁ¿ÔÚÆðµãstart×ø±êÖÐµÄ±íÊ¾
+    dcm = [cos(phi), -sin(phi); sin(phi), cos(phi)]; % ï¿½ï¿½ï¿½startï¿½ï¿½ï¿½ï¿½Ïµï¿½Ú»ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ÂµÄ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò¾ï¿½ï¿½ï¿½
+    % dcm*x ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½xï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÐµÄ±ï¿½Ê¾
+    tvec = dcm' * [pvec(1); pvec(2)]; % ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½startï¿½ï¿½ï¿½ï¿½ï¿½ÐµÄ±ï¿½Ê¾
 
-    % ¿´ÊÇ·ñ´Óµ±Ç°µãµ½Ä¿±êµã´æÔÚÎÞÅö×²µÄReeds-Shepp¹ì¼££¬Ç°Ãæpvec=End-Start;µÄÒâÒå¾ÍÔÚÕâÀï£¬×¢Òâ£¡ÕâÀïµÄx, y, prev(3)ÊÇ°ÑÆðµã×ª»»³ÉÒÔstartÎªÔ­µã×ø±êÏµÏÂµÄ×ø±ê
+    % ï¿½ï¿½ï¿½Ç·ï¿½Óµï¿½Ç°ï¿½ãµ½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×²ï¿½ï¿½Reeds-Sheppï¿½ì¼£ï¿½ï¿½Ç°ï¿½ï¿½pvec=End-Start;ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï£¬×¢ï¿½â£¡ï¿½ï¿½ï¿½ï¿½ï¿½x, y, prev(3)ï¿½Ç°ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½startÎªÔ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½Âµï¿½ï¿½ï¿½ï¿½ï¿½
     path = FindRSPath(tvec(1), tvec(2), pvec(3), veh);
 
-    % ÒÔÏÂÊÇ¸ù¾ÝÂ·¾¶µãºÍ³µÁ¾ÔË¶¯Ñ§Ä£ÐÍ¼ÆËãÎ»ÖÃ£¬¼ì²âÊÇ·ñ»á²úÉúÅö×²£¬·µ»ØisokµÄÖµ¡£¶ÔÃ¿¶ÎÂ·¾¶´ÓÆðµãµ½ÖÕµã°´Ë³Ðò½øÐÐ´¦Àí£¬ÕâÒ»¸öÏß¶ÎµÄÖÕµãpvecÊÇÏÂÒ»¸öÏß¶ÎµÄÆðµãpx, py, pth£¬  
+    % ï¿½ï¿½ï¿½ï¿½ï¿½Ç¸ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½Í³ï¿½ï¿½ï¿½ï¿½Ë¶ï¿½Ñ§Ä£ï¿½Í¼ï¿½ï¿½ï¿½Î»ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½isokï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ãµ½ï¿½Õµã°´Ë³ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ß¶Îµï¿½ï¿½Õµï¿½pvecï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ß¶Îµï¿½ï¿½ï¿½ï¿½px, py, pthï¿½ï¿½  
     types = path.type;
     t = rmin * path.t;
     u = rmin * path.u;
@@ -326,10 +326,10 @@ function [isok, path] = AnalysticExpantion(startPose, endPose, veh, cfg)
         px =pvec(1);
         py = pvec(2);
         pth = pvec(3);
-        s = sign(segs(i)); % ·ûºÅº¯Êý, ÅÐ¶Ï´Ë¶ÎÔË¶¯·½ÏòÊÇÇ°½ø»¹ÊÇºóÍË
+        s = sign(segs(i)); % ï¿½ï¿½ï¿½Åºï¿½ï¿½ï¿½, ï¿½Ð¶Ï´Ë¶ï¿½ï¿½Ë¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Çºï¿½ï¿½ï¿½
         
-        % ¸ù¾Ý³µÁ¾µÄ2*3ÖÖÔË¶¯ÀàÐÍ(Ç°ºó2ÖÖ£¬×ªÏò3ÖÖ)£¬ÉèÖÃDºÍdelta
-        D = s * mres; % ·Ö±æÂÊµÄÕý¸º
+        % ï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½ï¿½ï¿½2*3ï¿½ï¿½ï¿½Ë¶ï¿½ï¿½ï¿½ï¿½ï¿½(Ç°ï¿½ï¿½2ï¿½Ö£ï¿½×ªï¿½ï¿½3ï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Dï¿½ï¿½delta
+        D = s * mres; % ï¿½Ö±ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½
         if types(i) == 'S'
             delta = 0;
         elseif types(i) == 'L'
@@ -340,11 +340,11 @@ function [isok, path] = AnalysticExpantion(startPose, endPose, veh, cfg)
             % do nothing
         end
         
-        % °Ñ´Ë¶ÎµÄÂ·¾¶ÀëÉ¢³ÉÎªÂ·µã£¬¼´Õ¤¸ñË÷Òý, È»ºóÎªÂ·µã£¬È»ºó¼ì²âÊÇ·ñ´æÔÚÕÏ°­ÎïÅö×²ÎÊÌâ
-        for idx = 1 : round(abs(segs(i)) / mres) % round()ËÄÉáÎåÈë
-            % DºÍdeltaÊÇ¹Ì¶¨£¬ËµÃ÷×ªÍäµÄÊ±ºòÊÇ°´¹Ì¶¨°ë¾¶µÄÔ²×ªÍä
+        % ï¿½Ñ´Ë¶Îµï¿½Â·ï¿½ï¿½ï¿½ï¿½É¢ï¿½ï¿½ÎªÂ·ï¿½ã£¬ï¿½ï¿½Õ¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, È»ï¿½ï¿½ÎªÂ·ï¿½ã£¬È»ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ï¿½ï¿½ï¿½ï¿½×²ï¿½ï¿½ï¿½ï¿½
+        for idx = 1 : round(abs(segs(i)) / mres) % round()ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            % Dï¿½ï¿½deltaï¿½Ç¹Ì¶ï¿½ï¿½ï¿½Ëµï¿½ï¿½×ªï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Ì¶ï¿½ï¿½ë¾¶ï¿½ï¿½Ô²×ªï¿½ï¿½
            	[px, py, pth] = VehicleDynamic(px, py, pth, D, delta, veh.WB);
-            if rem(idx, 5) == 0 % rem(a, b)£¬·µ»ØÓÃ a / bºóµÄÓàÊý£¬Ã¿5¸öµã£¬¼´0.5m¼ì²éÏÂÊÇ·ñÅö×²
+            if rem(idx, 5) == 0 % rem(a, b)ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ a / bï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿5ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½0.5mï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½×²
                 tvec = [px, py, pth];
                 isCollision = VehicleCollisionCheck(tvec, obstline, veh);
                 if isCollision
@@ -354,26 +354,26 @@ function [isok, path] = AnalysticExpantion(startPose, endPose, veh, cfg)
          end
         if isCollision
             isok = false;
-            break % Èç¹ûÂ·¾¶´æÔÚÅö×²ÔòÉáÆú´ËÌõReeds-SheppÂ·¾¶
+            break % ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Reeds-SheppÂ·ï¿½ï¿½
         end
         pvec = [px, py, pth];
     end
-    % ÖÕµãÎ»×ËÐ¡ÓÚÆÚÍûãÐÖµÒ²ÉáÆú
+    % ï¿½Õµï¿½Î»ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÖµÒ²ï¿½ï¿½ï¿½ï¿½
     if (mod2pi(pth) - endPose(3)) > deg2rad(5)
         isok = false;
     end
 end
 
-% ¸ù¾Ýµ±Ç°Î»×ËºÍÊäÈë, ¼ÆËãÏÂÒ»Î»ÖÃµÄÎ»×Ë
-% x_dot = v_x * cos(theta); x_dot * t = v_x * t * cos(theta), ÔÚ²ÉÑùÊ±¼ätÄÚ, ÔòÓÐx = x + v_x * t * cos(theta)£¬ÆäÖÐv_x * t=D
+% ï¿½ï¿½ï¿½Ýµï¿½Ç°Î»ï¿½Ëºï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Î»ï¿½Ãµï¿½Î»ï¿½ï¿½
+% x_dot = v_x * cos(theta); x_dot * t = v_x * t * cos(theta), ï¿½Ú²ï¿½ï¿½ï¿½Ê±ï¿½ï¿½tï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½x = x + v_x * t * cos(theta)ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½v_x * t=D
 function [x, y, theta] = VehicleDynamic(x, y, theta, D, delta, L)
     x = x + D * cos(theta);
     y = y + D * sin(theta);
-    theta = theta + D / L * tan(delta); % LÊÇÖá¾à, º½Ïò±ä»¯, theta_dot=v / R, R=L / tan(delta)
+    theta = theta + D / L * tan(delta); % Lï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ä»¯, theta_dot=v / R, R=L / tan(delta)
     theta = mod2pi(theta);
 end
 
-% °ÑÎ»×Ë(x, y, theta)×ª»»ÎªgridÉÏµÄÕ¤¸ñË÷Òý, Èç¹û²»·ûºÏÊµ¼ÊÔòisok=false
+% ï¿½ï¿½Î»ï¿½ï¿½(x, y, theta)×ªï¿½ï¿½Îªgridï¿½Ïµï¿½Õ¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½isok=false
 function [isok, xidx, yidx, thidx] = CalcIdx(x, y, theta, cfg)
     gres = cfg.XY_GRID_RESOLUTION;
     yawres = cfg.YAW_GRID_RESOLUTION;
@@ -390,7 +390,7 @@ function [isok, xidx, yidx, thidx] = CalcIdx(x, y, theta, cfg)
         return
     end
     costmap = cfg.ObstMap;
-    if costmap(yidx, xidx) == inf
+    if costmap(yidx, xidx) > single(1e9) - single(0.001)
         isok = false;
     end
 end
